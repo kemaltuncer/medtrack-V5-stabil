@@ -1,6 +1,9 @@
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
-  return new Response(JSON.stringify({ status: "offline" }), { status: 200 });
+  return Response.json({ status: "Meditrack AI is resting" });
 }
+
 export async function POST() {
-  return new Response(JSON.stringify({ message: "AI Temporarily Disabled" }), { status: 200 });
+  return Response.json({ message: "AI Temporarily Offline" });
 }
