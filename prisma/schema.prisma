@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  lessons   Lesson[]
+  exams     Exam[]
+  notes     Note[]
+  pomodoros Pomodoro[]
+}
+
+model Lesson {
+  id        String   @id @default(cuid())
+  day       String
+  time      String
+  subject   String
+  topic     String
+  professor String?
+  location  String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Exam {
+  id        String   @id @default(cuid())
+  name      String
+  date      DateTime
+  grade     Float?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @db.Text
+  tag       String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Pomodoro {
+  id        String   @id @default(cuid())
+  duration  Int      
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
