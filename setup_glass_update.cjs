@@ -1,4 +1,7 @@
-"use client";
+const fs = require('fs');
+const p = require('path').join(process.cwd(), 'src/app/setup/page.tsx');
+
+const content = `"use client";
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Terminal, ArrowRight, CheckCircle2, ChevronLeft } from 'lucide-react';
@@ -8,88 +11,68 @@ export default function SetupWizard() {
   const [isBooting, setIsBooting] = useState(false);
   const [formData, setFormData] = useState({ role: '', specialty: '', goal: '', learningStyle: '', weakness: '', aiPersona: '', hours: 2 });
 
-    const data = {
+  const nextStep = () => setStep(s => s + 1);
+  const prevStep = () => setStep(s => s - 1);
+
+  // Görsel Veri Tabanı
+  const data = {
     roles: [
       { id: 'Öğrenci', title: 'Tıp Öğrencisi', sub: 'Pre-Klinik (1-3)', img: 'https://images.unsplash.com/photo-1532938911079-1b06ac7ce122?q=80&w=500' },
       { id: 'Stajyer', title: 'Klinik Stajyer', sub: 'Klinik (4-5)', img: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=500' },
       { id: 'İntern', title: 'İntern Doktor', sub: 'Dönem 6', img: 'https://images.unsplash.com/photo-1584982751601-97d8c222085c?q=80&w=500' },
-      { id: 'Hekim', title: 'Mezun Hekim', sub: 'Uzman / Pratisyen', img: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=500' },
-      { id: 'Akademisyen', title: 'Akademisyen', sub: 'Ar-Ge & PhD', img: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=500' }
+      { id: 'Hekim', title: 'Mezun Hekim', sub: 'Uzman / Pratisyen', img: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=500' }
     ],
     specialties: [
       { id: 'Dahiliye', title: 'Dahili Bilimler', sub: 'İç Hastalıkları, Pediatri', img: 'https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?q=80&w=500' },
       { id: 'Cerrahi', title: 'Cerrahi Bilimler', sub: 'Genel Cerrahi, KVC', img: 'https://images.unsplash.com/photo-1551076805-e1869043e560?q=80&w=500' },
       { id: 'Temel', title: 'Temel Bilimler', sub: 'Anatomi, Farmakoloji', img: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=500' },
-      { id: 'Acil', title: 'Acil & Yoğun Bakım', sub: 'Travma, Kritik Hasta', img: 'https://images.unsplash.com/photo-1583324113626-70df0f4deaab?q=80&w=500' },
-      { id: 'Psikiyatri', title: 'Nörolojik Bilimler', sub: 'Psikiyatri, Nöroloji', img: 'https://images.unsplash.com/photo-1559757175-5700dde675bc?q=80&w=500' }
+      { id: 'Acil', title: 'Acil & Yoğun Bakım', sub: 'Travma, Kritik Hasta', img: 'https://images.unsplash.com/photo-1583324113626-70df0f4deaab?q=80&w=500' }
     ],
     learning: [
       { id: 'Vaka', title: 'Vaka Bazlı', sub: 'Senaryo Çözümü', img: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=500' },
       { id: 'Görsel', title: 'Görsel Algı', sub: 'Şema ve Tablolar', img: 'https://images.unsplash.com/photo-1555255707-c07966088b7b?q=80&w=500' },
       { id: 'Spot', title: 'Spot Bilgi', sub: 'Hap Notlar', img: 'https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=500' },
-      { id: 'Sokratik', title: 'Sokratik', sub: 'Soru-Cevap', img: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=500' },
-      { id: 'İşitsel', title: 'İşitsel / Podcast', sub: 'Dinleyerek Öğrenme', img: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?q=80&w=500' }
+      { id: 'Sokratik', title: 'Sokratik', sub: 'Soru-Cevap', img: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=500' }
     ],
     weakness: [
       { id: 'Mekanizma', title: 'Temel Mekanizmalar', sub: 'Anatomi & Fizyoloji', img: 'https://images.unsplash.com/photo-1530213786676-4189f1756920?q=80&w=500' },
       { id: 'Farma', title: 'Farmakoloji', sub: 'İlaçlar & Dozlar', img: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?q=80&w=500' },
-      { id: 'Klinik', title: 'Klinik Algoritma', sub: 'Tanı & EKG', img: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=500' },
-      { id: 'Biyoistatistik', title: 'Biyoistatistik', sub: 'Makale & Analiz', img: 'https://images.unsplash.com/photo-1551288049-bbbda536ad37?q=80&w=500' },
-      { id: 'İngilizce', title: 'Tıbbi İngilizce', sub: 'Global Literatür', img: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=500' }
+      { id: 'Klinik', title: 'Klinik Algoritma', sub: 'Tanı & EKG', img: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=500' }
     ],
     personas: [
       { id: 'Asistan', title: 'Destekleyici', sub: 'Sabırlı Asistan', img: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=500' },
-      { id: 'Hoca', title: 'Acımasız Hoca', sub: 'Disiplinli', img: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?q=80&w=500' },
-      { id: 'Akademisyen', title: 'Akademisyen', sub: 'Detaycı & Kanıt Odaklı', img: 'https://images.unsplash.com/photo-1516533075015-a3838414c3ca?q=80&w=500' },
-      { id: 'Koç', title: 'Motivatör', sub: 'Enerjik & Hedef Odaklı', img: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=500' },
-      { id: 'Peer', title: 'Meslektaş', sub: 'Yatay Hiyerarşi', img: 'https://images.unsplash.com/photo-1527613426441-4da17471b66d?q=80&w=500' }
+      { id: 'Hoca', title: 'Acımasız Hoca', sub: 'Disiplinli', img: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?q=80&w=500' }
     ]
   };
 
-  const nextStep = () => setStep(s => s + 1);
-  const prevStep = () => setStep(s => s - 1);
-
-    const dynamicGoals = formData.role === 'Öğrenci' ? [
-    { id: 'Komite', title: 'Komite Canavarı', sub: 'Kurul ve çıkmış soru odaklı' },
-    { id: 'USMLE', title: 'USMLE Step 1', sub: 'UWorld ve İngilizce tıp' },
-    { id: 'Akademik', title: 'Akademik Başlangıç', sub: 'Araştırma ve makale okuma' },
-    { id: 'Etik', title: 'Tıbbi Etik & Sosyal Tıp', sub: 'Hekimlik felsefesi ve iletişim' },
-    { id: 'Spot', title: 'Spot Bilgi Kampı', sub: 'Flashcard ve ezber teknikleri' }
-  ] : formData.role === 'Stajyer' ? [
-    { id: 'Sözlü', title: 'Sözlü & Staj Bükücü', sub: 'Hoca karşısında klinik muhakeme' },
-    { id: 'TUS_Early', title: 'Erken TUS Hazırlığı', sub: 'Klinik branşlarla entegre TUS' },
-    { id: 'OSCE', title: 'Vaka Dedektifi (OSCE)', sub: 'Pratik muayene ve tanı becerisi' },
-    { id: 'Researcher', title: 'Klinik Araştırmacı', sub: 'Vaka sunumu ve literatür takibi' },
-    { id: 'Global', title: 'Global Hekimlik', sub: 'Yurt dışı staj ve akreditasyon' }
+  const dynamicGoals = formData.role === 'Öğrenci' ? [
+    { id: 'Komite', title: 'Komite Canavarı', sub: 'Sınav odaklı' }, { id: 'USMLE', title: 'USMLE Temeli', sub: 'İngilizce & Step 1' }
   ] : formData.role === 'İntern' ? [
-    { id: 'TUS_Max', title: 'TUS Şampiyonu', sub: 'Zamana karşı agresif soru kampı' },
-    { id: 'Nöbet', title: 'Nöbet Survival', sub: 'Acil müdahale ve reçete pratiği' },
-    { id: 'DHY', title: 'DHY Hazırlık', sub: 'Atama öncesi yasal ve pratik rehber' },
-    { id: 'Exit', title: 'Yurt Dışı Kaçış Planı', sub: 'OET/PLAB ve denklik sınavları' },
-    { id: 'Management', title: 'Hasta Yönetimi', sub: 'Servis ve poliklinik akışı' }
+    { id: 'TUS', title: 'TUS Şampiyonu', sub: 'Zamana karşı' }, { id: 'Nöbet', title: 'Nöbet Survival', sub: 'Acil müdahale' }
   ] : [
-    { id: 'Pratisyen', title: 'Pratisyen Defansı', sub: 'Malpraktis ve DHY pratikleri' },
-    { id: 'Uzman', title: 'Uzmanlık Gelişimi', sub: 'Spesifik vaka ve cerrahi teknikler' },
-    { id: 'TUS_Again', title: 'TUS Rövanşı', sub: 'İstifa sonrası/Yeniden hazırlık' },
-    { id: 'Thesis', title: 'Tez & Makale Analizi', sub: 'Akademik veri istatistiği' },
-    { id: 'Management', title: 'Klinik İşletme', sub: 'Sağlık yönetimi ve liderlik' }
+    { id: 'OSCE', title: 'Klinik Beceri', sub: 'Sözlü & Vaka' }, { id: 'TUS', title: 'Uzmanlık Sınavı', sub: 'Test odaklı' }
   ];
 
   return (
     <main className="min-h-screen bg-black text-white relative flex items-center justify-center p-4 md:p-8 font-sans overflow-hidden">
+      {/* Arka Plan Dev Görsel ve Blur Etkisi */}
       <div className="absolute inset-0 z-0">
         <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=2000" className="w-full h-full object-cover opacity-30" alt="bg" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/80 to-black" />
       </div>
 
+      {/* Ana Glassmorphism Panel */}
       <div className="relative z-10 w-full max-w-4xl bg-black/40 backdrop-blur-2xl border border-white/10 rounded-[3rem] p-8 md:p-14 shadow-2xl overflow-hidden flex flex-col min-h-[600px] justify-center">
+        
+        {/* Üst İlerleme Çubuğu */}
         {step > 0 && step < 8 && (
           <div className="absolute top-0 left-0 w-full h-1 bg-white/5">
-            <motion.div animate={{ width: `${(step / 7) * 100}%` }} className="h-full bg-blue-500 shadow-[0_0_15px_#3b82f6]" />
+            <motion.div animate={{ width: \`\${(step / 7) * 100}%\` }} className="h-full bg-blue-500 shadow-[0_0_15px_#3b82f6]" />
           </div>
         )}
 
         <AnimatePresence mode="wait">
+          {/* STEP 0: HOŞ GELDİN */}
           {step === 0 && (
             <motion.div key="s0" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="text-center">
               <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mx-auto mb-8 backdrop-blur-md">
@@ -100,6 +83,8 @@ export default function SetupWizard() {
               <button onClick={nextStep} className="px-12 py-5 bg-white text-black hover:bg-blue-600 hover:text-white rounded-full font-black uppercase text-xs tracking-widest transition-all duration-300">BAŞLAT</button>
             </motion.div>
           )}
+
+          {/* DİNAMİK RESİMLİ ADIMLAR (Step 1, 2, 4, 5, 6) */}
           {[
             { s: 1, title: 'Klinik Rolün', key: 'role', data: data.roles },
             { s: 2, title: 'İlgi Alanın', key: 'specialty', data: data.specialties },
@@ -107,11 +92,15 @@ export default function SetupWizard() {
             { s: 5, title: 'Zayıf Halkan', key: 'weakness', data: data.weakness },
             { s: 6, title: 'AI Karakteri', key: 'aiPersona', data: data.personas }
           ].map((block) => step === block.s && (
-            <motion.div key={`step${block.s}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full">
+            <motion.div key={\`step\${block.s}\`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full">
               <h2 className="text-3xl font-black mb-8 text-center italic">{block.title}</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
                 {block.data.map((item) => (
-                  <button key={item.id} onClick={() => setFormData({...formData, [block.key]: item.id})} className={`relative overflow-hidden rounded-3xl h-28 text-left group transition-all ${formData[block.key] === item.id ? 'ring-2 ring-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.3)] scale-[1.02]' : 'ring-1 ring-white/10 hover:ring-white/30'}`}>
+                  <button 
+                    key={item.id} 
+                    onClick={() => setFormData({...formData, [block.key]: item.id})}
+                    className={\`relative overflow-hidden rounded-3xl h-32 text-left group transition-all \${formData[block.key] === item.id ? 'ring-2 ring-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.3)] scale-[1.02]' : 'ring-1 ring-white/10 hover:ring-white/30'}\`}
+                  >
                     <img src={item.img} className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity duration-500" alt={item.title} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                     <div className="absolute bottom-4 left-5 right-5 z-10">
@@ -129,12 +118,13 @@ export default function SetupWizard() {
             </motion.div>
           ))}
 
+          {/* STEP 3: HEDEF (Resimsiz ama şık liste) */}
           {step === 3 && (
             <motion.div key="s3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full">
               <h2 className="text-3xl font-black mb-8 text-center italic">Ana Hedefin</h2>
               <div className="grid gap-4 mb-10">
                 {dynamicGoals.map((g) => (
-                  <button key={g.id} onClick={() => setFormData({...formData, goal: g.title})} className={`p-6 rounded-3xl border flex justify-between items-center transition-all ${formData.goal === g.title ? 'bg-blue-600/20 border-blue-500 backdrop-blur-md' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}>
+                  <button key={g.id} onClick={() => setFormData({...formData, goal: g.title})} className={\`p-6 rounded-3xl border flex justify-between items-center transition-all \${formData.goal === g.title ? 'bg-blue-600/20 border-blue-500 backdrop-blur-md' : 'bg-white/5 border-white/10 hover:bg-white/10'}\`}>
                     <div className="text-left">
                       <h4 className="text-lg font-black text-white">{g.title}</h4>
                       <p className="text-[10px] text-gray-400 uppercase tracking-widest">{g.sub}</p>
@@ -149,6 +139,8 @@ export default function SetupWizard() {
               </div>
             </motion.div>
           )}
+
+          {/* STEP 7: DOZAJ (Saat) */}
           {step === 7 && (
              <motion.div key="s7" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full text-center">
               <h2 className="text-3xl font-black mb-10 italic">Kapasite / Dozaj</h2>
@@ -163,6 +155,7 @@ export default function SetupWizard() {
             </motion.div>
           )}
 
+          {/* STEP 8: FINAL BOOT */}
           {step === 8 && (
             <motion.div key="s8" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="w-full text-center">
               {!isBooting ? (
@@ -170,16 +163,16 @@ export default function SetupWizard() {
                   <div className="w-24 h-24 bg-emerald-500/20 text-emerald-400 flex items-center justify-center rounded-full mx-auto mb-8"><CheckCircle2 size={48}/></div>
                   <h1 className="text-5xl font-black mb-4 italic uppercase">SİSTEM <span className="text-emerald-400">HAZIR.</span></h1>
                   <p className="text-gray-400 font-medium mb-10">Tüm klinik verilerin şifrelendi. Algoritman derlenmeye hazır.</p>
-                  <button onClick={() => { setIsBooting(true); setTimeout(() => window.location.href = '/dashboard', 3500); }} className="px-12 py-5 bg-white text-black hover:bg-emerald-400 rounded-full font-black uppercase tracking-widest transition-colors w-full max-w-sm">BOOT SEQUENCE BAŞLAT</button>
+                  <button onClick={() => { setIsBooting(true); setTimeout(() => window.location.href = '/dashboard', 3500); }} className="px-12 py-5 bg-white text-black hover:bg-emerald-400 rounded-full font-black uppercase tracking-widest transition-colors w-full max-w-sm">BOOT SİQUENCE BAŞLAT</button>
                 </>
               ) : (
                 <div className="text-left bg-black/60 p-8 rounded-3xl border border-blue-500/30">
                   <Terminal className="text-blue-500 mb-6 animate-pulse w-8 h-8" />
                   <div className="space-y-4 font-mono text-xs text-blue-400">
-                    <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.5}}>{">"} Profil: <span className="text-white">{formData.role}</span></motion.p>
-                    <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{delay:1.5}}>{">"} Odak: <span className="text-white">{formData.goal}</span></motion.p>
-                    <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{delay:2.5}} className="text-emerald-400">{">"} SENKRONİZASYON TAMAM</motion.p>
-                    <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{delay:3.0}} className="text-white animate-pulse">{">"} DASHBOARD'A AKTARILIYOR...</motion.p>
+                    <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.5}}>> Profil: <span className="text-white">{formData.role}</span></motion.p>
+                    <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{delay:1.5}}>> Odak: <span className="text-white">{formData.goal}</span></motion.p>
+                    <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{delay:2.5}} className="text-emerald-400">> SENKRONİZASYON TAMAM</motion.p>
+                    <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{delay:3.0}} className="text-white animate-pulse">> DASHBOARD'A AKTARILIYOR...</motion.p>
                   </div>
                 </div>
               )}
@@ -190,3 +183,7 @@ export default function SetupWizard() {
     </main>
   );
 }
+\`;
+
+fs.writeFileSync(p, content);
+console.log('✅ Premium Glassmorphism UI ve Görsel Veritabanı Başarıyla Yüklendi!');
